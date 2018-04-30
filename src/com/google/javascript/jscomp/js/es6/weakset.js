@@ -69,7 +69,14 @@ $jscomp.polyfill('WeakSet',
       var entry;
       while (!(entry = iter.next()).done) {
         var item = entry.value;
-        this.add(item);
+        try {
+          this.add(item);
+        } catch (e) {
+          if (iter['return'] !== undefined) {
+            iter['return']();
+          }
+          throw e;
+        }
       }
     }
   };

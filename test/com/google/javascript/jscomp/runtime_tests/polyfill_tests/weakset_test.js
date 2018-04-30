@@ -115,4 +115,32 @@ testSuite({
     assertTrue(set.has(b));
     assertFalse(set.has({}));
   },
+
+  testIteratorClosing() {
+    var closed = 0;
+    var iterator = {
+      next: function() {
+        return {
+          value: 'a',
+          done: false
+        };
+      },
+      return: function() {
+        closed++;
+        assertEquals(iterator, this);
+      }
+    };
+    var iter = {};
+    iter[Symbol.iterator] = function() { return iterator; };
+    var add = WeakSet.prototype.add;
+    WeakSet.prototype.add = function() { throw new Error(); };
+    try {
+      assertThrows(function() {
+        new WeakSet(iter);
+      });
+    } finally {
+      WeakSet.prototype.add = add;
+    }
+    assertEquals(1, closed);
+  },
 });

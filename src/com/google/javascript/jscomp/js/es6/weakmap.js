@@ -16,6 +16,7 @@
 
 'require es6/conformance';
 'require es6/symbol';
+'require es6/util/isobject';
 'require es6/util/makeiterator';
 'require util/defineproperty';
 'require util/owns';
