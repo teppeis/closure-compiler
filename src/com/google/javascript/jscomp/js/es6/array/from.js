@@ -49,8 +49,15 @@ $jscomp.polyfill('Array.from', function(orig) {
       var next;
       var k = 0;
       while (!(next = arrayLike.next()).done) {
-        result.push(
-            opt_mapFn.call(/** @type {?} */ (opt_thisArg), next.value, k++));
+        try {
+          result.push(
+              opt_mapFn.call(/** @type {?} */ (opt_thisArg), next.value, k++));
+        } catch (e) {
+          if (arrayLike['return'] !== undefined) {
+            arrayLike['return']();
+          }
+          throw e;
+        }
       }
     } else {
       var len = arrayLike.length;  // need to support non-iterables

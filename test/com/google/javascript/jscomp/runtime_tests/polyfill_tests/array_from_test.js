@@ -65,4 +65,31 @@ testSuite({
     assertObjectEquals([4, 8, 16], Array.from([1, 2, 4], applyThisTwice, x2));
     assertObjectEquals(['aaaa'], Array.from(noCheck('a'), applyThisTwice, x2));
   },
+
+  testIteratorClosing() {
+    var caught = 0;
+    var closed = 0;
+    var iterator = {
+      next: function() {
+        return {
+          done: false
+        };
+      },
+      'return': function() {
+        closed++;
+        assertEquals(iterator, this);
+      }
+    };
+    var iter = {};
+    iter[Symbol.iterator] = function() { return iterator; };
+    var err = new Error();
+    try {
+      Array.from(iter, function() { throw err; });
+    } catch (e) {
+      caught++;
+      assertEquals(err, e);
+    }
+    assertEquals(1, caught);
+    assertEquals(1, closed);
+  },
 });
