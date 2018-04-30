@@ -16,6 +16,7 @@
 
 'require es6/conformance';
 'require es6/symbol';
+'require es6/util/isobject';
 'require es6/util/makeiterator';
 'require es6/weakmap';
 'require util/defines';
@@ -134,7 +135,20 @@ $jscomp.polyfill('Map',
       while (!(entry = iter.next()).done) {
         var item =
             /** @type {!IIterableResult<!Array<KEY|VALUE>>} */ (entry).value;
-        this.set(/** @type {KEY} */ (item[0]), /** @type {VALUE} */ (item[1]));
+        if (!$jscomp.isObject(item)) {
+          if (iter['return'] !== undefined) {
+            iter['return']();
+          }
+          throw new TypeError('Iterator value ' + item + ' is not an object.');
+        }
+        try {
+          this.set(/** @type {KEY} */ (item[0]), /** @type {VALUE} */ (item[1]));
+        } catch (e) {
+          if (iter['return'] !== undefined) {
+            iter['return']();
+          }
+          throw e;
+        }
       }
     }
   };
@@ -142,6 +156,8 @@ $jscomp.polyfill('Map',
 
   /** @override */
   PolyfillMap.prototype.set = function(key, value) {
+    // normalize -0/+0 to +0
+    key = key === 0 ? 0 : key;
     var r = maybeGetEntry(this, key);
     if (!r.list) {
       r.list = (this.data_[r.id] = []);

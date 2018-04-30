@@ -15,6 +15,7 @@
  */
 
 'require base';
+'require es6/util/isobject';
 'require es6/util/makeiterator';
 'require util/global';
 'require util/polyfill';
@@ -234,7 +235,7 @@ $jscomp.polyfill('Promise',
       this.reject_(new TypeError('A Promise cannot resolve to itself'));
     } else if (value instanceof PolyfillPromise) {
       this.settleSameAsPromise_(/** @type {!PolyfillPromise} */ (value));
-    } else if (isObject(value)) {
+    } else if ($jscomp.isObject(value)) {
       this.resolveToNonPromiseObj_(/** @type {!Object} */ (value));
     } else {
       this.fulfill_(value);
@@ -262,22 +263,6 @@ $jscomp.polyfill('Promise',
       this.fulfill_(obj);
     }
   };
-
-
-  /**
-   * @param {*} value anything
-   * @return {boolean}
-   */
-  function isObject(value) {
-    switch (typeof value) {
-      case 'object':
-        return value != null;
-      case 'function':
-        return true;
-      default:
-        return false;
-    }
-  }
 
   /**
    * Reject this promise for the given reason.

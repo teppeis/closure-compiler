@@ -97,7 +97,14 @@ $jscomp.polyfill('Set',
       var entry;
       while (!(entry = iter.next()).done) {
         var item = /** @type {!IIterableResult<VALUE>} */ (entry).value;
-        this.add(item);
+        try {
+          this.add(item);
+        } catch (e) {
+          if (iter['return'] !== undefined) {
+            iter['return']();
+          }
+          throw e;
+        }
       }
     }
     // Note: this property should not be changed.  If we're willing to give up
@@ -109,6 +116,8 @@ $jscomp.polyfill('Set',
 
   /** @override */
   PolyfillSet.prototype.add = function(value) {
+    // normalize -0/+0 to +0
+    value = value === 0 ? 0 : value;
     this.map_.set(value, value);
     this.size = this.map_.size;
     return this;
