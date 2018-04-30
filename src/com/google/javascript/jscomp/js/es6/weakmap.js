@@ -16,7 +16,7 @@
 
 'require es6/conformance';
 'require es6/symbol';
-'require es6/util/isobject';
+'require es6/util/mapconstructor';
 'require es6/util/makeiterator';
 'require util/defineproperty';
 'require util/owns';
@@ -115,31 +115,7 @@ $jscomp.polyfill('WeakMap',
   var PolyfillWeakMap = function(opt_iterable) {
     /** @private @const {string} */
     this.id_ = (index += (Math.random() + 1)).toString();
-
-    if (opt_iterable) {
-      $jscomp.initSymbol();
-      $jscomp.initSymbolIterator();
-      var iter = $jscomp.makeIterator(opt_iterable);
-      var entry;
-      while (!(entry = iter.next()).done) {
-        var item =
-            /** @type {!IIterableResult<!Array<KEY|VALUE>>} */ (entry).value;
-        if (!$jscomp.isObject(item)) {
-          if (iter['return'] !== undefined) {
-            iter['return']();
-          }
-          throw new TypeError('Iterator value ' + item + ' is not an object.');
-        }
-        try {
-          this.set(/** @type {KEY} */ (item[0]), /** @type {VALUE} */ (item[1]));
-        } catch (e) {
-          if (iter['return'] !== undefined) {
-            iter['return']();
-          }
-          throw e;
-        }
-      }
-    }
+    $jscomp.mapConstructor(this, opt_iterable);
   };
 
   /** @override */
