@@ -121,4 +121,54 @@ testSuite({
     assertEquals(3, map.get(a));
     assertEquals(5, map.get(b));
   },
+
+  testIteratorClosing() {
+    var closed = 0;
+    var iterator = {
+      next: function() {
+        return {
+          value: null,
+          done: false
+        };
+      },
+      return: function() {
+        closed++;
+        assertEquals(iterator, this);
+      }
+    };
+    var iter = {};
+    iter[Symbol.iterator] = function() { return iterator; };
+    assertThrows(function() {
+      new Map(iter);
+    });
+    assertEquals(1, closed);
+  },
+
+  testIteratorClosing_setThrows() {
+    var closed = 0;
+    var iterator = {
+      next: function() {
+        return {
+          value: ['a', 'b'],
+          done: false
+        };
+      },
+      return: function() {
+        closed++;
+        assertEquals(iterator, this);
+      }
+    };
+    var iter = {};
+    iter[Symbol.iterator] = function() { return iterator; };
+    var set = Map.prototype.set;
+    Map.prototype.set = function() { throw new Error(); };
+    try {
+      assertThrows(function() {
+        new Map(iter);
+      });
+    } finally {
+      Map.prototype.set = set;
+    }
+    assertEquals(1, closed);
+  },
 });

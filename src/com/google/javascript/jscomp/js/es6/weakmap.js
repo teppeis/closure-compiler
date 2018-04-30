@@ -121,8 +121,22 @@ $jscomp.polyfill('WeakMap',
       var iter = $jscomp.makeIterator(opt_iterable);
       var entry;
       while (!(entry = iter.next()).done) {
-        var item = entry.value;
-        this.set(/** @type {KEY} */ (item[0]), /** @type {VALUE} */ (item[1]));
+        var item =
+            /** @type {!IIterableResult<!Array<KEY|VALUE>>} */ (entry).value;
+        if (!$jscomp.isObject(item)) {
+          if (iter['return'] !== undefined) {
+            iter['return']();
+          }
+          throw new TypeError('Iterator value ' + item + ' is not an object.');
+        }
+        try {
+          this.set(/** @type {KEY} */ (item[0]), /** @type {VALUE} */ (item[1]));
+        } catch (e) {
+          if (iter['return'] !== undefined) {
+            iter['return']();
+          }
+          throw e;
+        }
       }
     }
   };
